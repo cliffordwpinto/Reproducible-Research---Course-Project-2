@@ -1,0 +1,149 @@
+---
+output:
+html_document: default
+'html_document: rep_research_2': default
+---
+
+```{r setup, include=FALSE}
+require(knitr)
+opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+
+
+```{r echo=TRUE, results='hide', warning=FALSE, message=FALSE}
+ 
+#Impact Of Natural Disasters On The Economy And The Public Health Of The United States
+###Storms and other severe weather events can cause both public health and economic problems for communities and municipalities. Many severe events can result in fatalities, injuries, and property damage, and preventing such outcomes to the extent possible is a key concern. This project involves exploring the U.S. National Oceanic and Atmospheric Administration’s (NOAA) storm database. This database tracks characteristics of major storms and weather events in the United States, including when and where they occur, as well as estimates of any fatalities, injuries, and property damage.
+
+##Data Processing
+
+###The analysis was performed on Storm Events Database, provided by National Climatic Data Center. The data is from a comma-separated-value file available here. we download the data file and unzip it and generate a csv file
+ 
+download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", 
+              destfile="./repdata-data-StormData.csv.bz2", method="curl")
+ data <- read.csv('./repdata-data-StormData.csv.bz2', header=T)
+ 
+names(data) <- tolower(names(data))
+names(data) <- gsub("_","",names(data))
+data$evtype <- tolower(as.character(data$evtype))
+data$evtype <- gsub("^(([^:]+)://)?([^:/]+)(:([0-9]+))?(/.*)", "", data$evtype) 
+data <- subset(data, nchar(data$evtype) >= 2) 
+data$evtype[grep("summary", data$evtype)] <- "tbm"
+data <- subset(data, data$evtype != "tbm") 
+data$evtype[grep("heat", data$evtype)] <- "heat"
+data$evtype[grep("fog", data$evtype)] <- "fog"
+data$evtype[grep("surf", data$evtype)] <- "surf"
+data$evtype[grep("ice storm", data$evtype)] <- "ice storm"
+data$evtype[grep("fire", data$evtype)] <- "wild fire"
+data$evtype[grep("storm surge", data$evtype)] <- "strom surge"
+data$evtype[grep("hurricane", data$evtype)] <- "hurricane"
+data$evtype[grep("hail", data$evtype)] <- "hail"
+data$evtype[grep("wind", data$evtype)] <- "wind"
+data$evtype[grep("tornado", data$evtype)] <- "tornado"
+data$evtype[grep("flood", data$evtype)] <- "flood"
+data$evtype[grep("lightning", data$evtype)] <- "lightning"
+data$evtype[grep("snow", data$evtype)] <- "snow"
+data$evtype[grep("rain", data$evtype)] <- "rain"
+data$evtype[grep("winter", data$evtype)] <- "winter"
+data$evtype[grep("drought", data$evtype)] <- "drought"
+data$evtype[grep("thunderstorm", data$evtype)] <- "thunderstorm"
+```
+
+```{r echo=TRUE, results='hide', warning=FALSE, message=FALSE}
+sum(data$evtype %in% c("flood", "wind", "snow", "tornado", "hail", "rain", "lightning", 
+    "winter", "fog", "heat", "surf", "ice storm", "wild fire", "storm surge", 
+    "hurricane", "drought", "thunderstorm"))/nrow(data)
+```
+
+```{r echo=TRUE, results='hide', warning=FALSE, message=FALSE}
+#hello worldsss
+
+### By Regionsss
+tbc <- data$evtype %in% c("flood", "wind", "snow", "tornado", "hail", "rain", 
+    "lightning", "winter", "heat", "surf", "fog", "ice storm", "wild fire", 
+    "storm surge", "hurricane", "drought", "thunderstorm") == F
+data$evtype[tbc == T] <- "other"
+sort(table(data$evtype))
+```
+
+```{r echo=TRUE, results='hide', warning=FALSE, message=FALSE}
+ #hello worldsxx
+
+### By Regionsss
+data$propdmgexp <- as.character(data$propdmgexp)
+data$propdmgexp[grep("K", data$propdmgexp)] <- "1000"
+data$propdmgexp[grep("M", data$propdmgexp)] <- "1000000"
+data$propdmgexp[grep("m", data$propdmgexp)] <- "1000000"
+data$propdmgexp[grep("B", data$propdmgexp)] <- "1000000000"
+tbc <- data$propdmgexp %in% c("1000", "1000000", "1000000000") == F
+data$propdmgexp[tbc == T] <- "1"
+data$propdmgexp <- as.numeric(data$propdmgexp)
+ 
+data$cropdmgexp <- as.character(data$cropdmgexp)
+data$cropdmgexp[grep("K", data$cropdmgexp)] <- "1000"
+data$cropdmgexp[grep("M", data$cropdmgexp)] <- "1000000"
+data$cropdmgexp[grep("m", data$cropdmgexp)] <- "1000000"
+data$cropdmgexp[grep("B", data$cropdmgexp)] <- "1000000000"
+tbc <- data$cropdmgexp %in% c("1000", "1000000", "1000000000") == F
+data$cropdmgexp[tbc == T] <- "1"
+data$cropdmgexp <- as.numeric(data$cropdmgexp)
+data$propdamage <- data$propdmg * data$propdmgexp
+data$cropdamage <- data$cropdmg * data$cropdmgexp
+```
+
+```{r echo=TRUE, results='hide', warning=FALSE, message=FALSE}
+ ##Based on the above histograms, we find that Tornado and Flood had caused most fatalities and Tornado had caused most injuries in the United States from 1995 to 2011.
+
+
+totalInjuries <- tapply(data$injuries, data$evtype, sum)
+sort(totalInjuries, decreasing = T)[1]
+ 
+sum(sort(totalInjuries, decreasing = T)[1])/sum(totalInjuries)
+ 
+sort(totalInjuries, decreasing = T)[1:3]
+ 
+sum(sort(totalInjuries, decreasing = T)[1:3])/sum(totalInjuries)
+ 
+totalFatal <- tapply(data$fatalities, data$evtype, sum)
+sort(totalFatal, decreasing = T)[1]
+ 
+sum(sort(totalFatal, decreasing = T)[1])/sum(totalFatal)
+ 
+sort(totalFatal, decreasing = T)[1:3]
+sum(sort(totalFatal, decreasing = T)[1:3])/sum(totalFatal)
+TPropertyDamage <- tapply(data$propdamage, data$evtype, sum)
+sort(TPropertyDamage, decreasing = T)[1]
+sort(TPropertyDamage, decreasing = T)[1]/sum(TPropertyDamage)
+sort(TPropertyDamage, decreasing = T)[1:2]
+sum(sort(TPropertyDamage, decreasing = T)[1:2])/sum(TPropertyDamage)
+TCropDamage <- tapply(data$cropdamage, data$evtype, sum)
+sort(TCropDamage, decreasing = T)[1]
+sort(TCropDamage, decreasing = T)[1]/sum(TCropDamage)
+sort(TCropDamage, decreasing = T)[1:3]
+sum(sort(TCropDamage, decreasing = T)[1:3])/sum(TCropDamage)
+ 
+par(oma = c(0, 0, 3, 0))
+par(las = 2)
+par(mfcol = c(1, 2))
+barplot(sort(TPropertyDamage, decreasing = T), main = "Property")
+barplot(sort(TCropDamage, decreasing = T), main = "Crop")
+title("Impact", outer = T)
+```
+
+```{r echo=TRUE, results='hide', warning=FALSE, message=FALSE} 
+TPropertyDamage <- tapply(data$propdamage, data$evtype, sum)
+sort(TPropertyDamage, decreasing = T)[1] 
+sort(TPropertyDamage, decreasing = T)[1]/sum(TPropertyDamage) 
+sort(TPropertyDamage, decreasing = T)[1:2]
+par(oma = c(0, 0, 3, 0))
+par(las = 2)
+par(mfcol = c(1, 2))
+barplot(sort(totalInjuries, decreasing = T), main = "Injuries")
+title("Injuries")
+barplot(sort(totalFatal, decreasing = T), main = "Fatalities")
+title("Damages to Human Health", outer = T)
+
+##From these data, we found that Excessive Heat and Tornado are most harmful with respect to Population Health, while Flood, Drought and Hurricane/Typhoon have the greatest Economic Consequences.
+```
